@@ -1,0 +1,16 @@
+Type,Amount,Category,Description,Date,Wallet
+Income,2000.0,sell,sold my drone,2026-06-19,
+Expense,1000.0,cloth,barca jersey,2026-06-19,
+Income,1000.0,transfer,got transfered,2026-06-19,
+Income,1000.0,sell,got transfered,2026-06-19,
+Expense,250.0,books,power,2026-06-19,
+Expense,1800.0,suppliment,creatine 320 gram,2026-06-19,eSewa
+Income,5000.0,online,online,2026-06-19,eSewa
+Expense,400.0,books,atomic habits,2026-06-19,eSewa
+Expense,1200.0,Internet,,2026-06-19,eSewa
+Expense,1200.0,Internet,,2026-06-19,eSewa
+Income,9000.0,salarly,job,2026-06-19,Cash
+Expense,5000.0,robotics,kit,2026-06-20,Cash
+Expense,1000.0,cloth,tshirt,2026-06-21,Cash
+Income,7000.0,business,freelance,2026-06-22,eSewa
+Expense,2500.0,gym,,2026-06-25,Cash
