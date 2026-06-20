@@ -14,9 +14,20 @@ from phase1 import (
     show_wallets
 )
 
-from phase2 import run_phase2
+from phase2 import (
+    financial_goals,
+    emergency_fund,
+    recurring_transactions,
+    export_pdf,
+    monthly_reports
+)
 
-from phase3 import run_phase3
+from phase3 import (
+    show_ai_insights,
+    show_spending_prediction,
+    show_auto_category_detection,
+    show_smart_recommendations
+)
 
 st.set_page_config(page_title="FinTrace Pro", page_icon="💰", layout="wide")
 
@@ -112,9 +123,7 @@ page = st.sidebar.radio(
         "Analytics",
         "Budget",
         "Manage",
-        "Extra Features",
-        "Extra Features 2",
-        "Extra Features 3"
+        "Extra Features"
     ]
 )
 
@@ -189,44 +198,61 @@ elif page == "Add Transaction":
         key=f"wallet_{st.session_state.form_reset}"
     )
 
+
     tx_date = st.date_input(
         "Date",
         date.today(),
         key=f"date_{st.session_state.form_reset}"
     )
 
+    # Current Balance
+    income_total = df[df["Type"] == "Income"]["Amount"].sum()
+    expense_total = df[df["Type"] == "Expense"]["Amount"].sum()
+    current_balance = income_total - expense_total
+
+    st.info(f"💰 Current Balance: Rs.{current_balance:,.2f}")
+
     if st.button(
         "Save Transaction",
         key=f"save_{st.session_state.form_reset}"
     ):
 
-        row = pd.DataFrame([{
-            "Type": ttype,
-            "Amount": amount,
-            "Category": category,
-            "Description": description,
-            "Wallet": wallet,
-            "Date": tx_date
-        }])
+        # Prevent overspending
+        if ttype == "Expense" and amount > current_balance:
 
-        df = pd.concat([df, row], ignore_index=True)
+            st.error(
+                f"❌ Insufficient Balance! Available Balance: Rs.{current_balance:,.2f}"
+            )
 
-        df.to_csv(
-            DATA_FILE,
-            index=False
-        )
+        else:
 
-        if category and category not in saved_categories:
-            saved_categories.append(category)
+            row = pd.DataFrame([{
+                "Type": ttype,
+                "Amount": amount,
+                "Category": category,
+                "Description": description,
+                "Wallet": wallet,
+                "Date": tx_date
+            }])
 
-            with open(CAT_FILE, "w") as f:
-                json.dump(saved_categories, f)
+            df = pd.concat([df, row], ignore_index=True)
 
-        st.success("✅ Transaction Added")
+            df.to_csv(
+                DATA_FILE,
+                index=False
+            )
 
-        st.session_state.form_reset += 1
+            if category and category not in saved_categories:
+                saved_categories.append(category)
 
-        st.rerun()
+                with open(CAT_FILE, "w") as f:
+                    json.dump(saved_categories, f)
+
+            st.success("✅ Transaction Added")
+
+            st.session_state.form_reset += 1
+
+            st.rerun()
 
 elif page == "Analytics":
 
@@ -285,7 +311,7 @@ elif page == "Manage":
 
     if len(df):
 
-        st.dataframe(df,use_container_width=True)
+        st.dataframe(df, use_container_width=True)
 
         st.download_button(
             "Export CSV",
@@ -294,39 +320,83 @@ elif page == "Manage":
             "text/csv"
         )
 
+        
+
+        st.subheader("⚙️ Management Tools")
+
+        manage_tool = st.radio(
+            "Choose Tool",
+            [
+                "Search",
+                "Edit",
+                "Delete",
+                "Wallets"
+            ],
+            horizontal=True
+        )
+
+        st.divider()
+
+        if manage_tool == "Search":
+            show_search(df)
+
+        elif manage_tool == "Edit":
+            show_edit_transaction(df, DATA_FILE)
+
+        elif manage_tool == "Delete":
+            show_delete_transaction(df, DATA_FILE)
+
+        elif manage_tool == "Wallets":
+            show_wallets(df)
+
     else:
         st.info("No data found")
 
 elif page == "Extra Features":
 
-    st.title("🚀 Phase 1 Features")
+    st.title("🚀 Extra Features")
 
-    tab1, tab2, tab3, tab4 = st.tabs(
-        ["Search","Edit","Delete","Wallets"]
+    feature = st.radio(
+        "Select Feature",
+        [
+            "🎯 Goals",
+            "🚨 Emergency Fund",
+            "🔁 Recurring",
+            "📄 PDF Export",
+            "📊 Monthly Reports",
+            "🧠 AI Insights",
+            "🔮 Prediction",
+            "🏷 Auto Category",
+            "💡 Recommendations"
+        ]
     )
 
-    with tab1:
-        show_search(df)
+    if feature == "🎯 Goals":
+        financial_goals(df)
 
-    with tab2:
-        show_edit_transaction(df, DATA_FILE)
+    elif feature == "🚨 Emergency Fund":
+        emergency_fund(df)
 
-    with tab3:
-        show_delete_transaction(df, DATA_FILE)
+    elif feature == "🔁 Recurring":
+        recurring_transactions(df)
 
-    with tab4:
-        show_wallets(df)
-elif page == "Extra Features 2":
+    elif feature == "📄 PDF Export":
+        export_pdf(df)
 
-    st.title("🚀 Phase 2 Features")
+    elif feature == "📊 Monthly Reports":
+        monthly_reports(df)
 
-    run_phase2(df)
+    elif feature == "🧠 AI Insights":
+        show_ai_insights(df)
 
-elif page == "Extra Features 3":
+    elif feature == "🔮 Prediction":
+        show_spending_prediction(df)
 
-    st.title("🚀 Phase 3 Features")
+    elif feature == "🏷 Auto Category":
+        show_auto_category_detection(df)
 
-    run_phase3(df)
+    elif feature == "💡 Recommendations":
+        show_smart_recommendations(df)
 
 st.markdown("---")
 st.caption("FinTrace Pro • Developed by Sahil Jogi")
