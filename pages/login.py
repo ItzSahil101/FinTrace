@@ -7,15 +7,19 @@ from auth import create_login
 # ==========================
 # AUTO LOGGED IN SCREEN
 # ==========================
-if st.session_state.get("logged_in", False):
+from auth import create_login, check_login
 
-    st.success(f"Already logged in as {st.session_state.username}")
+user = check_login()
 
-    col1, col2 = st.columns(2)
+if user:
 
-    with col1:
-        if st.button("🏠 Go To Dashboard"):
-            st.switch_page("FinTrace.py")
+    st.session_state.logged_in = True
+    st.session_state.username = user
+
+    st.success(f"Already logged in as {user}")
+
+    if st.button("🏠 Go To Dashboard"):
+        st.switch_page("FinTrace.py")
 
     st.stop()
 
@@ -144,6 +148,7 @@ if login_btn:
 
         st.success("✅ Login successful")
         st.switch_page("FinTrace.py")
+        st.stop()
 
 # ==========================
 # SIGNUP LINK

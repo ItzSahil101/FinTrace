@@ -30,12 +30,22 @@ from phase3 import (
 )
 
 from auth import check_login
+from auth import logout
 
 user = check_login()
 
-if not user:
+if user is None:
+
+    st.session_state.logged_in = False
+
+    if "username" in st.session_state:
+        del st.session_state["username"]
+
     st.switch_page("pages/login.py")
     st.stop()
+
+st.session_state.logged_in = True
+st.session_state.username = user
 
 st.session_state.logged_in = True
 st.session_state.username = user
@@ -89,43 +99,92 @@ bg = "#f8fafc"
 card = "#ffffff"
 text = "#0f172a"
 
-st.markdown(f"""
+st.markdown("""
 <style>
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
-html, body, [class*="css"] {{
-font-family:'Inter',sans-serif;
-}}
+html, body, [class*="css"]{
+    font-family:'Inter',sans-serif;
+}
 
-.stApp {{
-background:{bg};
-color:{text};
-}}
+/* Main app */
+.stApp{
+    background:#f8fafc !important;
+}
 
-section[data-testid="stSidebar"] {{
-background:linear-gradient(180deg,#111827,#030712);
-}}
+/* Main content area */
+.main .block-container{
+    background:#f8fafc !important;
+    padding-top:2rem;
+}
 
-section[data-testid="stSidebar"] * {{
-color:white !important;
-font-size:16px !important;
-}}
+/* Sidebar */
+section[data-testid="stSidebar"]{
+    background:linear-gradient(180deg,#111827,#030712) !important;
+}
 
-div[data-testid="stMetric"] {{
-background:{card};
-padding:20px;
-border-radius:20px;
-}}
+section[data-testid="stSidebar"] *{
+    color:white !important;
+}
 
-.stButton button {{
-background:linear-gradient(135deg,#22c55e,#16a34a);
-color:white;
-border:none;
-border-radius:14px;
-height:52px;
-font-weight:700;
-width:100%;
-}}
+/* Sidebar navigation */
+[data-testid="stSidebarNav"]{
+    background:transparent !important;
+}
+
+[data-testid="stSidebarNav"] *{
+    color:white !important;
+}
+
+/* Metric cards */
+div[data-testid="stMetric"]{
+    background:white !important;
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 2px 12px rgba(0,0,0,.05);
+}
+
+/* Inputs */
+.stTextInput input,
+.stNumberInput input,
+.stDateInput input{
+    background:white !important;
+}
+
+/* Selectboxes */
+[data-baseweb="select"]{
+    background:white !important;
+    border-radius:10px;
+}
+
+/* Buttons */
+.stButton button{
+    width:100%;
+    height:52px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    color:white !important;
+    font-weight:700;
+}
+
+/* Dataframe */
+[data-testid="stDataFrame"]{
+    border-radius:14px;
+    overflow:hidden;
+}
+
+/* Expander */
+.streamlit-expanderHeader{
+    font-weight:600;
+}
+
+/* Keep Plotly charts normal */
+.js-plotly-plot{
+    background:white !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -139,9 +198,13 @@ st.sidebar.success(f"👤 {username}")
 
 if st.sidebar.button("🚪 Logout"):
 
+    logout()
+
     st.session_state.clear()
 
     st.switch_page("pages/login.py")
+
+    st.stop()
 
 # page = st.sidebar.radio(
 #     "Navigate",

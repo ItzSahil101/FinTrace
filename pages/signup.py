@@ -6,9 +6,16 @@ import os
 # ==========================
 # ALREADY LOGGED IN CHECK
 # ==========================
-if st.session_state.get("logged_in", False):
+from auth import check_login
 
-    st.success(f"Already logged in as {st.session_state.username}")
+user = check_login()
+
+if user:
+
+    st.session_state.logged_in = True
+    st.session_state.username = user
+
+    st.success(f"Already logged in as {user}")
 
     if st.button("🏠 Go To Dashboard"):
         st.switch_page("FinTrace.py")

@@ -20,13 +20,16 @@ if not os.path.exists(TOKEN_FILE):
 
 
 def create_login(username):
+
     token = f"{username}_{int(time.time())}"
 
-    # store expiry (3 days)
     expiry = time.time() + (3 * 24 * 60 * 60)
 
-    with open(TOKEN_FILE, "r") as f:
-        data = json.load(f)
+    try:
+        with open(TOKEN_FILE, "r") as f:
+            data = json.load(f)
+    except:
+        data = {}
 
     data[token] = {
         "username": username,
@@ -41,33 +44,43 @@ def create_login(username):
 
 
 def check_login():
+
     token = cookies.get("auth_token")
 
     if not token:
         return None
 
     try:
+
         with open(TOKEN_FILE, "r") as f:
             data = json.load(f)
 
         if token not in data:
             return None
 
-        user_data = data[token]
+        user = data[token]
 
-        if time.time() > user_data["expiry"]:
+        if time.time() > user["expiry"]:
+
+            del data[token]
+
+            with open(TOKEN_FILE, "w") as f:
+                json.dump(data, f)
+
             return None
 
-        return user_data["username"]
+        return user["username"]
 
     except:
         return None
 
 
 def logout():
+
     token = cookies.get("auth_token")
 
-    if token:
+    try:
+
         with open(TOKEN_FILE, "r") as f:
             data = json.load(f)
 
@@ -77,5 +90,12 @@ def logout():
         with open(TOKEN_FILE, "w") as f:
             json.dump(data, f)
 
-    cookies["auth_token"] = ""
+    except:
+        pass
+
+    try:
+        del cookies["auth_token"]
+    except:
+        pass
+
     cookies.save()
