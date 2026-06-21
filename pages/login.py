@@ -8,8 +8,16 @@ if st.session_state.get("logged_in", False):
 
     st.success(f"Already logged in as {st.session_state.username}")
 
-    if st.button("🏠 Go To Dashboard"):
-        st.switch_page("FinTrace.py")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("🏠 Go To Dashboard"):
+            st.switch_page("FinTrace.py")
+
+    with col2:
+        if st.button("🚪 Logout"):
+            st.session_state.clear()
+            st.rerun()
 
     st.stop()
 
@@ -56,39 +64,27 @@ html, body, [class*="css"]{
     font-family:'Inter',sans-serif;
 }
 
+/* MAIN BACKGROUND */
 .stApp{
-    background:#f8fafc;
-}
-            
-section[data-testid="stSidebar"]{
     background:linear-gradient(180deg,#111827,#030712);
 }
 
+/* SIDEBAR FIX (IMPORTANT) */
+section[data-testid="stSidebar"]{
+    background:linear-gradient(180deg,#111827,#030712) !important;
+}
+
+/* sidebar text */
 section[data-testid="stSidebar"] *{
     color:white !important;
 }
 
+/* remove default sidebar nav background */
 [data-testid="stSidebarNav"]{
     background:transparent;
 }
 
-[data-testid="stSidebarNav"] a{
-    color:white !important;
-}
-
-.title{
-    text-align:center;
-    font-size:36px;
-    font-weight:800;
-    color:#0f172a;
-}
-
-.subtitle{
-    text-align:center;
-    color:#64748b;
-    margin-bottom:20px;
-}
-
+/* buttons */
 .stButton button{
     width:100%;
     height:52px;
@@ -99,55 +95,23 @@ section[data-testid="stSidebar"] *{
     font-weight:700;
 }
 
+.title{
+    text-align:center;
+    font-size:36px;
+    font-weight:800;
+    color:white;
+}
+
+.subtitle{
+    text-align:center;
+    color:#cbd5e1;
+    margin-bottom:20px;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-# ==========================
-# HEADER
-# ==========================
-st.markdown(
-    '<div class="title">💰 FinTrace Pro</div>',
-    unsafe_allow_html=True
-)
 
-st.markdown(
-    '<div class="subtitle">Welcome back to your finance dashboard</div>',
-    unsafe_allow_html=True
-)
-
-st.info(
-    "Track expenses, income, budgets, savings goals, reports and AI insights in one place."
-)
-
-# ==========================
-# ABOUT APP
-# ==========================
-with st.expander("📖 Learn More"):
-    st.markdown("""
-### Why FinTrace Pro?
-
-✅ Track every rupee
-
-✅ Manage income & expenses
-
-✅ Savings goals
-
-✅ Budget management
-
-✅ Monthly reports
-
-✅ AI insights
-
-✅ Spending predictions
-
-✅ Personal accounts
-
-Each account stores its own private financial data and reports.
-""")
-
-# ==========================
-# LOGIN FORM
-# ==========================
 st.subheader("🔐 Login")
 
 username = st.text_input("Username")

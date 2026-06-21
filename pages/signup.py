@@ -59,18 +59,21 @@ html, body, [class*="css"]{
     font-family:'Inter',sans-serif;
 }
 
+/* MAIN BACKGROUND */
 .stApp{
-    background:#f8fafc;
-}
-            
-section[data-testid="stSidebar"]{
     background:linear-gradient(180deg,#111827,#030712);
+}
+
+/* SIDEBAR FIX */
+section[data-testid="stSidebar"]{
+    background:linear-gradient(180deg,#111827,#030712) !important;
 }
 
 section[data-testid="stSidebar"] *{
     color:white !important;
 }
 
+/* sidebar nav */
 [data-testid="stSidebarNav"]{
     background:transparent;
 }
@@ -79,19 +82,21 @@ section[data-testid="stSidebar"] *{
     color:white !important;
 }
 
+/* TITLE */
 .title{
     text-align:center;
     font-size:36px;
     font-weight:800;
-    color:#0f172a;
+    color:white;
 }
 
 .subtitle{
     text-align:center;
-    color:#64748b;
+    color:#cbd5e1;
     margin-bottom:20px;
 }
 
+/* BUTTON */
 .stButton button{
     width:100%;
     height:52px;
