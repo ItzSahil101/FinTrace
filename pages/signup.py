@@ -3,6 +3,9 @@ import pandas as pd
 import json
 import os
 
+# ==========================
+# ALREADY LOGGED IN CHECK
+# ==========================
 if st.session_state.get("logged_in", False):
 
     st.success(f"Already logged in as {st.session_state.username}")
@@ -35,20 +38,18 @@ if not os.path.exists(DATA_FOLDER):
     os.makedirs(DATA_FOLDER)
 
 # ==========================
-# LOAD USERS SAFELY
+# LOAD USERS
 # ==========================
 try:
     with open(USERS_FILE, "r") as f:
         users = json.load(f)
-
     if not isinstance(users, dict):
         users = {}
-
 except:
     users = {}
 
 # ==========================
-# DESIGN
+# CSS (ONLY SIDEBAR DARK)
 # ==========================
 st.markdown("""
 <style>
@@ -59,12 +60,9 @@ html, body, [class*="css"]{
     font-family:'Inter',sans-serif;
 }
 
-/* MAIN BACKGROUND */
-.stApp{
-    background:linear-gradient(180deg,#111827,#030712);
-}
+/* MAIN PAGE = KEEP LIGHT (DO NOTHING) */
 
-/* SIDEBAR FIX */
+/* SIDEBAR DARK */
 section[data-testid="stSidebar"]{
     background:linear-gradient(180deg,#111827,#030712) !important;
 }
@@ -87,12 +85,12 @@ section[data-testid="stSidebar"] *{
     text-align:center;
     font-size:36px;
     font-weight:800;
-    color:white;
+    color:#0f172a;
 }
 
 .subtitle{
     text-align:center;
-    color:#cbd5e1;
+    color:#64748b;
     margin-bottom:20px;
 }
 
@@ -111,50 +109,28 @@ section[data-testid="stSidebar"] *{
 """, unsafe_allow_html=True)
 
 # ==========================
-# HEADER
+# UI
 # ==========================
-st.markdown(
-    '<div class="title">💰 FinTrace Pro</div>',
-    unsafe_allow_html=True
-)
+st.markdown('<div class="title">💰 FinTrace Pro</div>', unsafe_allow_html=True)
 
-st.markdown(
-    '<div class="subtitle">Create your personal finance account</div>',
-    unsafe_allow_html=True
-)
+st.markdown('<div class="subtitle">Create your personal finance account</div>', unsafe_allow_html=True)
 
-st.info(
-    "Track expenses, income, budgets, savings goals, reports and AI insights in one dashboard."
-)
+st.info("Track expenses, income, budgets, savings goals, reports and AI insights in one dashboard.")
 
-# ==========================
-# ABOUT APP
-# ==========================
 with st.expander("📖 Learn More"):
     st.markdown("""
 ### Why FinTrace Pro?
 
-✅ Track every rupee
-
-✅ Manage income & expenses
-
-✅ Savings goals
-
-✅ Budget management
-
-✅ Monthly reports
-
-✅ AI insights
-
-✅ Spending predictions
-
-✅ Personal accounts
-
-Each account has its own private financial records and reports.
+✅ Track every rupee  
+✅ Manage income & expenses  
+✅ Savings goals  
+✅ Budget management  
+✅ Monthly reports  
+✅ AI insights  
 """)
 
 # ==========================
-# SIGNUP FORM
+# FORM
 # ==========================
 st.subheader("📝 Create Account")
 
@@ -167,53 +143,36 @@ signup_btn = st.button("🚀 Create Account")
 if signup_btn:
 
     if username.strip() == "":
-        st.error("❌ Please enter a username.")
+        st.error("❌ Please enter username")
 
     elif password.strip() == "":
-        st.error("❌ Please enter a password.")
+        st.error("❌ Please enter password")
 
     elif password != confirm_password:
-        st.error("❌ Passwords do not match.")
+        st.error("❌ Password mismatch")
 
     elif username in users:
-        st.error("❌ Username already exists.")
+        st.error("❌ Username already exists")
 
     else:
-
         users[username] = password
 
         with open(USERS_FILE, "w") as f:
             json.dump(users, f, indent=4)
 
-        user_file = os.path.join(
-            DATA_FOLDER,
-            f"{username}.csv"
-        )
+        user_file = os.path.join(DATA_FOLDER, f"{username}.csv")
 
-        pd.DataFrame(
-            columns=[
-                "Type",
-                "Amount",
-                "Category",
-                "Description",
-                "Wallet",
-                "Date"
-            ]
-        ).to_csv(
-            user_file,
-            index=False
-        )
+        pd.DataFrame(columns=[
+            "Type","Amount","Category","Description","Wallet","Date"
+        ]).to_csv(user_file, index=False)
 
-        st.success("✅ Account Created Successfully!")
-        st.balloons()
-
-        st.info("You can now login with your new account.")
+        st.success("✅ Account created!")
+        st.info("Now go to login page")
 
 # ==========================
 # LOGIN BUTTON
 # ==========================
 st.markdown("---")
-
 st.write("Already have an account?")
 
 if st.button("🔑 Go To Login"):

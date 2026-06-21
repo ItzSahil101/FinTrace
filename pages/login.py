@@ -4,6 +4,9 @@ import os
 
 from auth import create_login
 
+# ==========================
+# AUTO LOGGED IN SCREEN
+# ==========================
 if st.session_state.get("logged_in", False):
 
     st.success(f"Already logged in as {st.session_state.username}")
@@ -40,20 +43,18 @@ if not os.path.exists(USERS_FILE):
         json.dump({}, f)
 
 # ==========================
-# LOAD USERS
+# LOAD USERS SAFELY
 # ==========================
 try:
     with open(USERS_FILE, "r") as f:
         users = json.load(f)
-
     if not isinstance(users, dict):
         users = {}
-
 except:
     users = {}
 
 # ==========================
-# DESIGN
+# DESIGN (ONLY SIDEBAR DARK FIX)
 # ==========================
 st.markdown("""
 <style>
@@ -64,27 +65,39 @@ html, body, [class*="css"]{
     font-family:'Inter',sans-serif;
 }
 
-/* MAIN BACKGROUND */
-.stApp{
-    background:linear-gradient(180deg,#111827,#030712);
-}
-
-/* SIDEBAR FIX (IMPORTANT) */
+/* ONLY SIDEBAR DARK THEME */
 section[data-testid="stSidebar"]{
     background:linear-gradient(180deg,#111827,#030712) !important;
+    min-height:100vh;
 }
 
-/* sidebar text */
 section[data-testid="stSidebar"] *{
     color:white !important;
 }
 
-/* remove default sidebar nav background */
 [data-testid="stSidebarNav"]{
-    background:transparent;
+    background:transparent !important;
 }
 
-/* buttons */
+[data-testid="stSidebarNav"] a{
+    color:white !important;
+}
+
+/* MAIN CONTENT UNCHANGED */
+.title{
+    text-align:center;
+    font-size:36px;
+    font-weight:800;
+    color:#0f172a;
+}
+
+.subtitle{
+    text-align:center;
+    color:#64748b;
+    margin-bottom:20px;
+}
+
+/* BUTTON STYLE */
 .stButton button{
     width:100%;
     height:52px;
@@ -95,23 +108,21 @@ section[data-testid="stSidebar"] *{
     font-weight:700;
 }
 
-.title{
-    text-align:center;
-    font-size:36px;
-    font-weight:800;
-    color:white;
-}
-
-.subtitle{
-    text-align:center;
-    color:#cbd5e1;
-    margin-bottom:20px;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
+# ==========================
+# HEADER
+# ==========================
+st.markdown('<div class="title">💰 FinTrace Pro</div>', unsafe_allow_html=True)
 
+st.markdown('<div class="subtitle">Welcome back to your finance dashboard</div>', unsafe_allow_html=True)
+
+st.info("Track expenses, income, budgets, savings goals, reports and AI insights in one place.")
+
+# ==========================
+# LOGIN FORM
+# ==========================
 st.subheader("🔐 Login")
 
 username = st.text_input("Username")
@@ -125,27 +136,22 @@ if login_btn:
         st.warning("⚠️ Please fill all fields.")
 
     elif username not in users:
-
         st.warning("⚠️ Account not found.")
 
-        # if st.button("📝 Create Account"):
-        #     st.switch_page("pages/signup.py")
-
     elif users[username] != password:
-
         st.error("❌ Wrong password.")
 
     else:
+        create_login(username)
 
-     create_login(username)
+        st.session_state.logged_in = True
+        st.session_state.username = username
 
-     st.session_state.logged_in = True
-     st.session_state.username = username
-     st.success("✅ Login successful")
-     st.switch_page("FinTrace.py")
+        st.success("✅ Login successful")
+        st.switch_page("FinTrace.py")
 
 # ==========================
-# SIGNUP BUTTON
+# SIGNUP LINK
 # ==========================
 st.markdown("---")
 
