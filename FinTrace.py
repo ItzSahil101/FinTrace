@@ -55,7 +55,10 @@ DATA_FILE = os.path.join(
     f"{username}.csv"
 )
 
-CAT_FILE = "categories.json"
+CAT_FILE = os.path.join(
+    DATA_FOLDER,
+    f"{username}_categories.json"
+)
 
 
 if not os.path.exists(DATA_FILE):
@@ -71,11 +74,16 @@ if not os.path.exists(DATA_FILE):
 ).to_csv(DATA_FILE,index=False)
 
 if not os.path.exists(CAT_FILE):
-    with open(CAT_FILE,"w") as f:
-        json.dump([],f)
+    with open(CAT_FILE, "w") as f:
+        json.dump([], f)
 
-with open(CAT_FILE,"r") as f:
-    saved_categories = json.load(f)
+try:
+    with open(CAT_FILE, "r") as f:
+        saved_categories = json.load(f)
+    if not isinstance(saved_categories, list):
+        saved_categories = []
+except:
+    saved_categories = []
 
 bg = "#f8fafc"
 card = "#ffffff"
