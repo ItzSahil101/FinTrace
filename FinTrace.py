@@ -29,10 +29,34 @@ from phase3 import (
     show_smart_recommendations
 )
 
+from auth import check_login
+
+user = check_login()
+
+if not user:
+    st.switch_page("pages/login.py")
+    st.stop()
+
+st.session_state.logged_in = True
+st.session_state.username = user
+
+username = st.session_state.username
+
+
 st.set_page_config(page_title="FinTrace Pro", page_icon="💰", layout="wide")
 
-DATA_FILE = "transactions.csv"
+DATA_FOLDER = "data"
+
+if not os.path.exists(DATA_FOLDER):
+    os.makedirs(DATA_FOLDER)
+
+DATA_FILE = os.path.join(
+    DATA_FOLDER,
+    f"{username}.csv"
+)
+
 CAT_FILE = "categories.json"
+
 
 if not os.path.exists(DATA_FILE):
     pd.DataFrame(
@@ -102,6 +126,14 @@ st.title("💰 FinTrace Pro")
 df = pd.read_csv(DATA_FILE)
 
 st.sidebar.title("🚀 FinTrace")
+
+st.sidebar.success(f"👤 {username}")
+
+if st.sidebar.button("🚪 Logout"):
+
+    st.session_state.clear()
+
+    st.switch_page("pages/login.py")
 
 # page = st.sidebar.radio(
 #     "Navigate",
