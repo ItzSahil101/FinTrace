@@ -2,17 +2,20 @@ import streamlit as st
 import json
 import os
 
-from auth import create_login
-
-# ==========================
-# AUTO LOGGED IN SCREEN
-# ==========================
 from auth import create_login, check_login
 
+# ==========================
+# BASE PATH FIX (IMPORTANT)
+# ==========================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+USERS_FILE = os.path.join(BASE_DIR, "users.json")
+
+# ==========================
+# AUTO LOGIN CHECK
+# ==========================
 user = check_login()
 
 if user:
-
     st.session_state.logged_in = True
     st.session_state.username = user
 
@@ -33,27 +36,26 @@ st.set_page_config(
 )
 
 # ==========================
-# FILES
+# SAFE LOAD USERS
 # ==========================
-USERS_FILE = "users.json"
+def load_users():
+    try:
+        with open(USERS_FILE, "r") as f:
+            data = json.load(f)
+            return data if isinstance(data, dict) else {}
+    except:
+        return {}
 
-if not os.path.exists(USERS_FILE):
-    with open(USERS_FILE, "w") as f:
-        json.dump({}, f)
-
-# ==========================
-# LOAD USERS SAFELY
-# ==========================
-try:
-    with open(USERS_FILE, "r") as f:
-        users = json.load(f)
-    if not isinstance(users, dict):
-        users = {}
-except:
-    users = {}
+users = load_users()
 
 # ==========================
-# DESIGN (ONLY SIDEBAR DARK FIX)
+# CLEAN USERNAME FUNCTION
+# ==========================
+def clean_username(name):
+    return name.strip().lower()
+
+# ==========================
+# CSS (UNCHANGED)
 # ==========================
 st.markdown("""
 <style>
@@ -64,7 +66,6 @@ html, body, [class*="css"]{
     font-family:'Inter',sans-serif;
 }
 
-/* ONLY SIDEBAR DARK THEME */
 section[data-testid="stSidebar"]{
     background:linear-gradient(180deg,#111827,#030712) !important;
     min-height:100vh;
@@ -74,15 +75,10 @@ section[data-testid="stSidebar"] *{
     color:white !important;
 }
 
-[data-testid="stSidebarNav"]{
-    background:transparent !important;
-}
-
 [data-testid="stSidebarNav"] a{
     color:white !important;
 }
 
-/* MAIN CONTENT UNCHANGED */
 .title{
     text-align:center;
     font-size:36px;
@@ -96,7 +92,6 @@ section[data-testid="stSidebar"] *{
     margin-bottom:20px;
 }
 
-/* BUTTON STYLE */
 .stButton button{
     width:100%;
     height:52px;
@@ -111,10 +106,9 @@ section[data-testid="stSidebar"] *{
 """, unsafe_allow_html=True)
 
 # ==========================
-# HEADER
+# UI HEADER
 # ==========================
 st.markdown('<div class="title">💰 FinTrace Pro</div>', unsafe_allow_html=True)
-
 st.markdown('<div class="subtitle">Welcome back to your finance dashboard</div>', unsafe_allow_html=True)
 
 st.info("Track expenses, income, budgets, savings goals, reports and AI insights in one place.")
@@ -127,24 +121,27 @@ st.subheader("🔐 Login")
 username = st.text_input("Username")
 password = st.text_input("Password", type="password")
 
-login_btn = st.button("🔑 Login")
+# ==========================
+# LOGIN LOGIC (FIXED)
+# ==========================
+if st.button("🔑 Login"):
 
-if login_btn:
+    username_clean = clean_username(username)
 
-    if username.strip() == "" or password.strip() == "":
+    if not username_clean or not password:
         st.warning("⚠️ Please fill all fields.")
 
-    elif username not in users:
+    elif username_clean not in users:
         st.warning("⚠️ Account not found.")
 
-    elif users[username] != password:
+    elif users[username_clean] != password:
         st.error("❌ Wrong password.")
 
     else:
-        create_login(username)
+        create_login(username_clean)
 
         st.session_state.logged_in = True
-        st.session_state.username = username
+        st.session_state.username = username_clean
 
         st.success("✅ Login successful")
         st.switch_page("FinTrace.py")
@@ -154,7 +151,6 @@ if login_btn:
 # SIGNUP LINK
 # ==========================
 st.markdown("---")
-
 st.write("Don't have an account?")
 
 if st.button("📝 Go To Sign Up"):

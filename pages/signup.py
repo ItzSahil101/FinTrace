@@ -11,7 +11,6 @@ from auth import check_login
 user = check_login()
 
 if user:
-
     st.session_state.logged_in = True
     st.session_state.username = user
 
@@ -32,11 +31,16 @@ st.set_page_config(
 )
 
 # ==========================
-# FILES
+# FIX: BASE PATH (IMPORTANT FOR CLOUD + LOCAL)
 # ==========================
-USERS_FILE = "users.json"
-DATA_FOLDER = "data"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+USERS_FILE = os.path.join(BASE_DIR, "users.json")
+DATA_FOLDER = os.path.join(BASE_DIR, "data")
+
+# ==========================
+# FILE INIT
+# ==========================
 if not os.path.exists(USERS_FILE):
     with open(USERS_FILE, "w") as f:
         json.dump({}, f)
@@ -45,18 +49,30 @@ if not os.path.exists(DATA_FOLDER):
     os.makedirs(DATA_FOLDER)
 
 # ==========================
-# LOAD USERS
+# LOAD USERS SAFELY
 # ==========================
-try:
-    with open(USERS_FILE, "r") as f:
-        users = json.load(f)
-    if not isinstance(users, dict):
-        users = {}
-except:
-    users = {}
+def load_users():
+    try:
+        with open(USERS_FILE, "r") as f:
+            data = json.load(f)
+            return data if isinstance(data, dict) else {}
+    except:
+        return {}
+
+def save_users(users):
+    with open(USERS_FILE, "w") as f:
+        json.dump(users, f, indent=4)
+
+users = load_users()
 
 # ==========================
-# CSS (ONLY SIDEBAR DARK)
+# FIX: NORMALIZE USERNAME
+# ==========================
+def clean_username(name):
+    return name.strip().lower()
+
+# ==========================
+# CSS (UNCHANGED)
 # ==========================
 st.markdown("""
 <style>
@@ -67,9 +83,6 @@ html, body, [class*="css"]{
     font-family:'Inter',sans-serif;
 }
 
-/* MAIN PAGE = KEEP LIGHT (DO NOTHING) */
-
-/* SIDEBAR DARK */
 section[data-testid="stSidebar"]{
     background:linear-gradient(180deg,#111827,#030712) !important;
 }
@@ -78,16 +91,6 @@ section[data-testid="stSidebar"] *{
     color:white !important;
 }
 
-/* sidebar nav */
-[data-testid="stSidebarNav"]{
-    background:transparent;
-}
-
-[data-testid="stSidebarNav"] a{
-    color:white !important;
-}
-
-/* TITLE */
 .title{
     text-align:center;
     font-size:36px;
@@ -101,7 +104,6 @@ section[data-testid="stSidebar"] *{
     margin-bottom:20px;
 }
 
-/* BUTTON */
 .stButton button{
     width:100%;
     height:52px;
@@ -119,7 +121,6 @@ section[data-testid="stSidebar"] *{
 # UI
 # ==========================
 st.markdown('<div class="title">💰 FinTrace Pro</div>', unsafe_allow_html=True)
-
 st.markdown('<div class="subtitle">Create your personal finance account</div>', unsafe_allow_html=True)
 
 st.info("Track expenses, income, budgets, savings goals, reports and AI insights in one dashboard.")
@@ -145,32 +146,42 @@ username = st.text_input("Username")
 password = st.text_input("Password", type="password")
 confirm_password = st.text_input("Confirm Password", type="password")
 
-signup_btn = st.button("🚀 Create Account")
+# ==========================
+# SIGNUP LOGIC (FIXED)
+# ==========================
+if st.button("🚀 Create Account"):
 
-if signup_btn:
+    username_clean = clean_username(username)
 
-    if username.strip() == "":
+    # validations
+    if not username_clean:
         st.error("❌ Please enter username")
 
-    elif password.strip() == "":
+    elif len(username_clean) < 4:
+        st.error("❌ Username must be at least 4 characters")
+
+    elif not password:
         st.error("❌ Please enter password")
+
+    elif len(password) < 6:
+        st.error("❌ Password must be at least 6 characters")
 
     elif password != confirm_password:
         st.error("❌ Password mismatch")
 
-    elif username in users:
+    elif username_clean in users:
         st.error("❌ Username already exists")
 
     else:
-        users[username] = password
+        # SAVE USER (FIXED)
+        users[username_clean] = password
+        save_users(users)
 
-        with open(USERS_FILE, "w") as f:
-            json.dump(users, f, indent=4)
-
-        user_file = os.path.join(DATA_FOLDER, f"{username}.csv")
+        # CREATE USER FILE
+        user_file = os.path.join(DATA_FOLDER, f"{username_clean}.csv")
 
         pd.DataFrame(columns=[
-            "Type","Amount","Category","Description","Wallet","Date"
+            "Type", "Amount", "Category", "Description", "Wallet", "Date"
         ]).to_csv(user_file, index=False)
 
         st.success("✅ Account created!")
