@@ -17,11 +17,6 @@ if st.session_state.get("logged_in", False):
         if st.button("🏠 Go To Dashboard"):
             st.switch_page("FinTrace.py")
 
-    with col2:
-        if st.button("🚪 Logout"):
-            st.session_state.clear()
-            st.rerun()
-
     st.stop()
 
 # ==========================
