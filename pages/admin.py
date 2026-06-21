@@ -4,9 +4,11 @@ import json
 import pandas as pd
 
 # =========================
-# CONFIG
+# FIXED BASE PATH (IMPORTANT)
 # =========================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# go ONE LEVEL UP from pages folder
 PROJECT_DIR = os.path.dirname(BASE_DIR)
 
 USERS_FILE = os.path.join(PROJECT_DIR, "users.json")
@@ -22,26 +24,35 @@ st.set_page_config(page_title="Admin Panel", page_icon="🔐", layout="wide")
 st.title("🔐 Admin Panel - FinTrace")
 
 # =========================
-# LOAD USERS
+# LOAD USERS (SAFE)
 # =========================
 def load_users():
-    if os.path.exists(USERS_FILE):
+    try:
         with open(USERS_FILE, "r") as f:
-            return json.load(f)
-    return {}
+            data = json.load(f)
+            return data if isinstance(data, dict) else {}
+    except:
+        return {}
 
 users = load_users()
 
 # =========================
-# LOGIN SECTION
+# DEBUG (REMOVE LATER IF YOU WANT)
+# =========================
+st.write("📍 USERS FILE:", USERS_FILE)
+
+# =========================
+# LOGIN STATE
 # =========================
 if "admin_logged_in" not in st.session_state:
     st.session_state.admin_logged_in = False
 
+# =========================
+# LOGIN PAGE
+# =========================
 if not st.session_state.admin_logged_in:
 
     st.warning("⚠️ Admin Access Only")
-
     st.info('Hint: "sahil hometown name"')
 
     password = st.text_input("Enter Admin Password", type="password")
@@ -59,58 +70,67 @@ if not st.session_state.admin_logged_in:
     st.stop()
 
 # =========================
-# ADMIN DASHBOARD
+# DASHBOARD
 # =========================
 st.success("Welcome Admin 👑")
 
 # =========================
-# USERS LIST
+# USERS VIEW
 # =========================
 st.subheader("👤 All Users")
 
 if users:
     st.json(users)
 else:
-    st.info("No users found")
+    st.warning("No users found")
 
 # =========================
-# VIEW USER DATA
+# FILE LIST
 # =========================
-st.subheader("📊 User Data Viewer")
-
-user_files = []
+st.subheader("📁 All User Data Files")
 
 if os.path.exists(DATA_FOLDER):
     user_files = os.listdir(DATA_FOLDER)
+else:
+    user_files = []
 
-selected_file = st.selectbox("Select user data file", user_files if user_files else ["No files"])
+selected_file = st.selectbox(
+    "Select file to view",
+    user_files if user_files else ["No files"]
+)
 
-if selected_file and selected_file != "No files":
+if selected_file != "No files":
 
     file_path = os.path.join(DATA_FOLDER, selected_file)
 
-    df = pd.read_csv(file_path)
-
-    st.dataframe(df)
+    if os.path.exists(file_path):
+        df = pd.read_csv(file_path)
+        st.dataframe(df)
+    else:
+        st.error("File not found")
 
 # =========================
-# DELETE USER DATA
+# DELETE FILE
 # =========================
 st.subheader("🗑️ Delete User Data")
 
-delete_file = st.selectbox("Select file to delete", user_files if user_files else ["No files"], key="delete")
+delete_file = st.selectbox(
+    "Select file to delete",
+    user_files if user_files else ["No files"],
+    key="delete"
+)
 
 if st.button("Delete Selected File"):
 
     if delete_file != "No files":
-
         path = os.path.join(DATA_FOLDER, delete_file)
 
-        os.remove(path)
-
-        st.success(f"Deleted {delete_file}")
-
-        st.rerun()
+        if os.path.exists(path):
+            os.remove(path)
+            st.success(f"Deleted {delete_file}")
+            st.rerun()
+        else:
+            st.error("File already missing")
 
 # =========================
 # LOGOUT
