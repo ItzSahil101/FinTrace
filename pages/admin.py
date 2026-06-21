@@ -6,15 +6,12 @@ import pandas as pd
 # =========================
 # FIXED BASE PATH (IMPORTANT)
 # =========================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# go ONE LEVEL UP from pages folder
-PROJECT_DIR = os.path.dirname(BASE_DIR)
+USERS_FILE = os.path.join(BASE_DIR, "users.json")
+DATA_FOLDER = os.path.join(BASE_DIR, "data")
 
-USERS_FILE = os.path.join(PROJECT_DIR, "users.json")
-DATA_FOLDER = os.path.join(PROJECT_DIR, "data")
-
-ADMIN_PASSWORD = "kanepokhari-7, aaitabare"
+ADMIN_PASSWORD = "kanepokhari7s"
 
 # =========================
 # PAGE SETUP
@@ -53,7 +50,7 @@ if "admin_logged_in" not in st.session_state:
 if not st.session_state.admin_logged_in:
 
     st.warning("⚠️ Admin Access Only")
-    st.info('Hint: "sahil hometown name"')
+    st.info('Hint: "sahil password"')
 
     password = st.text_input("Enter Admin Password", type="password")
 
