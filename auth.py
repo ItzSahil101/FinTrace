@@ -46,8 +46,9 @@ def create_login(username):
 def check_login():
 
     token = cookies.get("auth_token")
-
-    st.write("DEBUG TOKEN =", token)
+    
+    print("========== DEBUG ==========")
+    print("TOKEN:", token)
 
     if not token:
         return None
