@@ -5,11 +5,15 @@ import pandas as pd
 
 # =========================
 # FIXED BASE PATH (IMPORTANT)
-# =========================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# ========================
 
-USERS_FILE = os.path.join(BASE_DIR, "users.json")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 DATA_FOLDER = os.path.join(BASE_DIR, "data")
+
+# Use same users.json path as login page
+LOGIN_DIR = os.path.dirname(os.path.abspath(__file__))
+USERS_FILE = os.path.join(LOGIN_DIR, "users.json")
 
 ADMIN_PASSWORD = "kanepokhari7s"
 
