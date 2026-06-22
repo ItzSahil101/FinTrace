@@ -134,6 +134,50 @@ if st.button("Delete Selected File"):
             st.error("File already missing")
 
 # =========================
+# DELETE USER ACCOUNT
+# =========================
+st.subheader("👤❌ Delete User Account")
+
+if users:
+
+    selected_user = st.selectbox(
+        "Select user to delete",
+        list(users.keys())
+    )
+
+    st.warning(
+        "This will permanently delete the user account and their data file."
+    )
+
+    if st.button("🚨 Delete User Account"):
+
+        try:
+            # Remove from users.json
+            del users[selected_user]
+
+            with open(USERS_FILE, "w") as f:
+                json.dump(users, f, indent=4)
+
+            # Remove CSV file
+            csv_file = os.path.join(
+                DATA_FOLDER,
+                f"{selected_user}.csv"
+            )
+
+            if os.path.exists(csv_file):
+                os.remove(csv_file)
+
+            st.success(f"✅ User '{selected_user}' deleted successfully")
+
+            st.rerun()
+
+        except Exception as e:
+            st.error(f"Error deleting user: {e}")
+
+else:
+    st.info("No users available")
+
+# =========================
 # LOGOUT
 # =========================
 if st.button("🚪 Logout"):
