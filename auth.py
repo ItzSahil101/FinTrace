@@ -47,6 +47,8 @@ def check_login():
 
     token = cookies.get("auth_token")
 
+    st.write("DEBUG TOKEN =", token)
+
     if not token:
         return None
 
