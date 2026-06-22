@@ -154,29 +154,106 @@ def show_monthly_summary(df):
 
 def show_savings_rate(df):
 
-    st.subheader("💹 Savings Rate")
+    st.subheader("📊 Financial Overview")
 
     if len(df) == 0:
+        st.info("No transactions found.")
         return
 
-    income = df[
-        df["Type"] == "Income"
-    ]["Amount"].sum()
+    # =========================
+    # BASIC CALCULATIONS
+    # =========================
 
-    expense = df[
-        df["Type"] == "Expense"
-    ]["Amount"].sum()
+    income = df[df["Type"] == "Income"]["Amount"].sum()
+    expense = df[df["Type"] == "Expense"]["Amount"].sum()
 
-    if income > 0:
+    if income <= 0:
+        st.warning("Add income to calculate insights.")
+        return
 
-        rate = (
-            (income - expense)
-            / income
-        ) * 100
+    savings_rate = max(0, ((income - expense) / income) * 100)
+
+    # Budget + Debt (safe defaults)
+    budget = st.session_state.get("monthly_budget", 20000)
+    debt = st.session_state.get("total_debt", 0)
+
+    expense_ratio = (expense / income) * 100
+    debt_ratio = (debt / income) * 100
+
+    # =========================
+    # SCORES
+    # =========================
+
+    savings_score = min(savings_rate, 100)
+    spending_score = max(0, 100 - expense_ratio)
+
+    budget_usage = (expense / budget) * 100 if budget > 0 else 0
+    budget_score = max(0, 100 - abs(100 - budget_usage)) if budget > 0 else 70
+
+    debt_score = max(0, 100 - debt_ratio) if income > 0 else 100
+
+    financial_health = round(
+        savings_score * 0.35 +
+        spending_score * 0.25 +
+        budget_score * 0.25 +
+        debt_score * 0.15
+    )
+
+    # =========================
+    # UI: 50 / 50 LAYOUT
+    # =========================
+
+    col1, col2 = st.columns(2)
+
+    # -------------------------
+    # LEFT: SAVINGS RATE
+    # -------------------------
+    with col1:
+
+        st.subheader("💰 Savings Rate")
 
         st.metric(
-            "Savings Rate",
-            f"{rate:.1f}%"
+            "Rate",
+            f"{savings_rate:.1f}%"
+        )
+
+        st.progress(min(savings_rate / 100, 1.0))
+
+        st.caption(f"Income: Rs.{income:,.0f} | Expense: Rs.{expense:,.0f}")
+
+    # -------------------------
+    # RIGHT: FINANCIAL HEALTH
+    # -------------------------
+    with col2:
+
+        st.subheader("🏥 Financial Health")
+
+        st.metric(
+            "Score",
+            f"{financial_health}/100"
+        )
+
+        st.progress(financial_health / 100)
+
+        # =========================
+        # COLOR BADGES
+        # =========================
+
+        if financial_health >= 80:
+            st.success("🟢 Excellent Financial Health")
+
+        elif financial_health >= 60:
+            st.info("🔵 Good Financial Health")
+
+        elif financial_health >= 40:
+            st.warning("🟠 Fair Financial Health")
+
+        else:
+            st.error("🔴 Poor Financial Health")
+
+        # extra insight
+        st.caption(
+            f"Savings:{savings_score:.0f} | Spending:{spending_score:.0f} | Budget:{budget_score:.0f} | Debt:{debt_score:.0f}"
         )
 
 def show_budget_alert(df):
