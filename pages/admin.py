@@ -6,7 +6,7 @@ import pandas as pd
 # =========================
 # FIXED BASE PATH (IMPORTANT)
 # =========================
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 USERS_FILE = os.path.join(BASE_DIR, "users.json")
 DATA_FOLDER = os.path.join(BASE_DIR, "data")
