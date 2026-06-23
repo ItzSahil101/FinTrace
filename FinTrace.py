@@ -414,6 +414,71 @@ elif page == "Manage":
 
     if len(df):
 
+        st.subheader("📥 Import Transactions")
+
+uploaded_file = st.file_uploader(
+    "Upload CSV File",
+    type=["csv"]
+)
+
+if uploaded_file is not None:
+
+    try:
+        imported_df = pd.read_csv(uploaded_file)
+
+        required_columns = [
+            "Type",
+            "Amount",
+            "Category",
+            "Description",
+            "Wallet",
+            "Date"
+        ]
+
+        missing = [
+            col for col in required_columns
+            if col not in imported_df.columns
+        ]
+
+        if missing:
+            st.error(
+                f"Missing columns: {', '.join(missing)}"
+            )
+
+        else:
+
+            st.success(
+                f"Found {len(imported_df)} transactions"
+            )
+
+            st.dataframe(
+                imported_df.head(),
+                use_container_width=True
+            )
+
+            if st.button("✅ Import Transactions"):
+
+                current_df = pd.read_csv(DATA_FILE)
+
+                merged_df = pd.concat(
+                    [current_df, imported_df],
+                    ignore_index=True
+                )
+
+                merged_df.to_csv(
+                    DATA_FILE,
+                    index=False
+                )
+
+                st.success(
+                    f"Imported {len(imported_df)} transactions successfully!"
+                )
+
+                st.rerun()
+
+    except Exception as e:
+        st.error(f"Error reading CSV: {e}")
+
         st.dataframe(df, use_container_width=True)
 
         st.download_button(
