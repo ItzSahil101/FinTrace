@@ -412,9 +412,124 @@ elif page == "Manage":
 
     st.subheader("Manage Transactions")
 
+    # ==========================
+    # IMPORT CSV
+    # ==========================
+    st.subheader("📥 Import Transactions")
+
+    uploaded_file = st.file_uploader(
+        "Upload CSV File",
+        type=["csv"]
+    )
+
+    if uploaded_file is not None:
+
+        try:
+            imported_df = pd.read_csv(uploaded_file)
+
+            required_columns = [
+                "Type",
+                "Amount",
+                "Category",
+                "Description",
+                "Wallet",
+                "Date"
+            ]
+
+            missing = [
+                col for col in required_columns
+                if col not in imported_df.columns
+            ]
+
+            if missing:
+                st.error(
+                    f"Missing columns: {', '.join(missing)}"
+                )
+
+            else:
+
+                st.success(
+                    f"Found {len(imported_df)} transactions"
+                )
+
+                st.dataframe(
+                    imported_df.head(),
+                    use_container_width=True
+                )
+
+                if st.button("✅ Import Transactions"):
+
+                    current_df = pd.read_csv(DATA_FILE)
+
+                    merged_df = pd.concat(
+                        [current_df, imported_df],
+                        ignore_index=True
+                    )
+
+                    merged_df = merged_df.drop_duplicates()
+
+                    merged_df.to_csv(
+                        DATA_FILE,
+                        index=False
+                    )
+
+                    st.success(
+                        f"Imported {len(imported_df)} transactions successfully!"
+                    )
+
+                    st.rerun()
+
+        except Exception as e:
+            st.error(f"Error reading CSV: {e}")
+
+    st.divider()
+
+    # ==========================
+    # EXISTING MANAGE FEATURES
+    # ==========================
     if len(df):
 
-        st.subheader("📥 Import Transactions")
+        st.dataframe(
+            df,
+            use_container_width=True
+        )
+
+        st.download_button(
+            "Export CSV",
+            df.to_csv(index=False).encode(),
+            "fintrace_export.csv",
+            "text/csv"
+        )
+
+        st.subheader("⚙️ Management Tools")
+
+        manage_tool = st.radio(
+            "Choose Tool",
+            [
+                "Search",
+                "Edit",
+                "Delete",
+                "Wallets"
+            ],
+            horizontal=True
+        )
+
+        st.divider()
+
+        if manage_tool == "Search":
+            show_search(df)
+
+        elif manage_tool == "Edit":
+            show_edit_transaction(df, DATA_FILE)
+
+        elif manage_tool == "Delete":
+            show_delete_transaction(df, DATA_FILE)
+
+        elif manage_tool == "Wallets":
+            show_wallets(df)
+
+    else:
+        st.info("No data found")
 
 uploaded_file = st.file_uploader(
     "Upload CSV File",
