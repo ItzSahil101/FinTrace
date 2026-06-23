@@ -418,9 +418,10 @@ elif page == "Manage":
     st.subheader("📥 Import Transactions")
 
     uploaded_file = st.file_uploader(
-        "Upload CSV File",
-        type=["csv"]
-    )
+    "Upload CSV File",
+    type=["csv"],
+    key="csv_import_uploader"
+)
 
     if uploaded_file is not None:
 
